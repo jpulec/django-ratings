@@ -136,12 +136,12 @@ class RatingManager(object):
         except (ValueError, TypeError):
             raise InvalidRating("%s is not a valid choice for %s" % (score, self.field.name))
         
-        delete = (score == 0)
+        delete = (score == None)
         if delete and not self.field.allow_delete:
             raise CannotDeleteVote("you are not allowed to delete votes for %s" % (self.field.name,))
             # ... you're also can't delete your vote if you haven't permissions to change it. I leave this case for CannotChangeVote
         
-        if score < 0 or score > self.field.range:
+        if score not in self.field.range:
             raise InvalidRating("%s is not a valid choice for %s" % (score, self.field.name))
 
         is_anonymous = (user is None or not user.is_authenticated())
@@ -330,7 +330,7 @@ class RatingField(IntegerField):
             raise TypeError("%s invalid attribute 'choices'" % (self.__class__.__name__,))
         self.can_change_vote = kwargs.pop('can_change_vote', False)
         self.weight = kwargs.pop('weight', 0)
-        self.range = kwargs.pop('range', 2)
+        self.range = kwargs.pop('range', [0,1,2])
         self.allow_anonymous = kwargs.pop('allow_anonymous', False)
         self.use_cookies = kwargs.pop('use_cookies', False)
         self.allow_delete = kwargs.pop('allow_delete', False)
